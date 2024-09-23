@@ -1,0 +1,306 @@
+library(tidyverse)
+data("starwars")
+
+head(starwars)
+
+unique(starwars$hair_color)
+
+#Identify categorical variables and convert
+
+View(starwars %>% summarise_all(n_distinct))
+
+View(lengths(lapply(starwars,unique)))
+
+glimpse(starwars)
+
+starwars[c("hair_color","skin_color","sex","gender")] <- lapply(starwars[c("hair_color","skin_color","sex","gender")],factor)
+glimpse(starwars)
+
+unique(starwars$hair_color)
+unique(starwars$eye_color)
+unique(starwars$gender)
+
+stw1$hair_color<-as.factor(stw1$hair_color)
+stw1$eye_color<-as.factor(stw1$eye_color)
+stw1$gender<-as.factor(stw1$gender)
+
+
+#Display the categorical levels of any variable of your choice. Swap the categorical levels within its categories. 
+levels(starwars$gender)
+
+levels(starwars$gender)<- factor(starwars$gender,levels =c("masculine","feminine"))
+levels(stw2$gender)
+stw2$gender<-fct_relevel(stw2$gender,"masculine","feminine")
+levels(stw2$gender)
+
+#Using the pipe operator select these variables only to display their contents (name, height, end_with color).
+starwars1 <- starwars %>%
+  select(name,height,ends_with("color"))
+
+#Filter the contents with blond and brown hair color and height < 180.
+stw3 %>% 
+  select(name,height,ends_with("color")) %>% 
+  filter(hair_color %in% c("blond","brown") & height<180)
+
+starwars1 <- starwars1 %>% 
+  filter((hair_color=="blond" | hair_color=="brown") & height<180) %>% 
+  view
+
+#Calculate the mean of the height
+mean(stw3$height,na.rm = TRUE )
+
+
+################################### GRAPHS #####################################
+## EXAMPLE RELATIONSHIPS TO PLOT
+library(tidyverse)
+library(ggplot2)
+install.packages(c("tidyverse", "ggridges"))
+library(tidyverse)
+library(ggridges)
+library(corrr)
+library(ggcorrplot)
+##To plot the distribution of height and mass by species, 
+##you can use a boxplot with geom_boxplot() and facet the plot by species with facet_wrap():
+
+
+starwars %>%
+  filter(!is.na(species)) %>%
+  ggplot(aes(x = sex, y = height, fill = sex)) +
+  geom_boxplot() +
+  facet_wrap(~species) +
+  labs(title = "Height distribution by species and sex",
+       x = "Sex", y = "Height (cm)")
+
+## To plot the relationship between height and mass by gender, you can use a scatter plot with geom_point() and color the points by gender with aes(color = gender):
+starwars %>%
+  filter(!is.na(height) & !is.na(mass)) %>%
+  ggplot(aes(x = height, y = mass, color = gender)) +
+  geom_point() +
+  labs(title = "Relationship between height and mass by gender",
+       x = "Height (cm)", y = "Mass (kg)")
+
+## To plot the number of films each character appeared in by homeworld, you can use a bar chart with geom_bar() and reorder the homeworlds by the number of films with fct_reorder():
+starwars %>%
+  mutate(n_films = length(films)) %>%
+  ggplot(aes(x = fct_reorder(homeworld, n_films), y = n_films, fill = homeworld)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Number of films each character appeared in by homeworld",
+       x = "Homeworld", y = "Number of films")
+
+## To plot the distribution of birth year by gender, you can use a histogram with geom_histogram() and fill the bars by gender with aes(fill = gender):
+starwars %>%
+  filter(!is.na(birth_year) & !is.na(gender)) %>%
+  ggplot(aes(x = birth_year, fill = gender)) +
+  geom_histogram(bins = 10) +
+  labs(title = "Distribution of birth year by gender",
+       x = "Birth year (BBY)", y = "Count")
+
+## To plot the proportion of species by homeworld, you can use a pie chart with geom_bar() and coord_polar() and label the slices with geom_text():
+starwars %>%
+  count(homeworld, species) %>%
+  group_by(homeworld) %>%
+  mutate(prop = n / sum(n)) %>%
+  ggplot(aes(x = "", y = prop, fill = species)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  geom_text(aes(label = scales::percent(prop)), position = position_stack(vjust = 0.5)) +
+  facet_wrap(~homeworld) +
+  labs(title = "Proportion of species by homeworld",
+       x = NULL, y = NULL)
+
+##To plot the correlation matrix of numeric variables, you can use the corrr package to compute the correlations and the ggcorrplot package to create a heatmap with ggcorrplot():
+starwars %>%
+  select_if(is.numeric) %>%
+  correlate() %>%
+  ggcorrplot(type = "lower", lab = TRUE) +
+  labs(title = "Correlation matrix of numeric variables")
+
+#######ALL POSSIBLE GRAPHS###############
+#This dataset contains data about characters from the Star Wars movies, 
+#including height, mass, hair color, skin color, eye color, gender, 
+#homeworld, species, and more.
+
+### Preparations:
+
+
+# Installing and loading required packages
+
+# Load the starwars dataset
+data(starwars)
+
+
+### starwars dataset:
+
+## 1. *Basic Histogram*:
+### Histogram: A histogram displays the distribution of a continuous variable using rectangular bins. 
+### You can use geom_histogram() to create a histogram, and control the number or width of the bins with the bins 
+### or binwidth arguments. 
+
+###For example, you can create a histogram of the height of 
+### the characters using geom_histogram():
+##Distribution of heights of characters.
+
+ggplot(starwars, aes(x=height)) +
+  geom_histogram(binwidth=10, fill="steelblue") +
+  labs(title="Histogram of Character Heights", x="Height", y="Count") +
+  theme_minimal()
+
+
+## 2. *Bar Plot*:
+### Bar chart: A bar chart displays the counts or proportions of different categories using rectangular bars. 
+### You can use geom_bar() to create a simple bar chart, 
+### or geom_col() to create a bar chart based on pre-computed values.
+##Count of characters by eye color.
+ggplot(starwars, aes(x=eye_color)) +
+  geom_bar(fill="steelblue") +
+  labs(title="Count of Characters by Eye Color") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+### Another example, you can create a bar chart of the number of characters by gender using geom_bar():
+
+ggplot(starwars, aes(x = gender)) +
+  geom_bar() +
+  labs(title = "Number of characters by gender",
+       x = "Gender", y = "Count")
+
+
+## 3. *Scatter Plot*:
+### Scatter plot: A scatter plot displays the relationship between two continuous variables using points. 
+### You can use geom_point() to create a scatter plot, and optionally map other variables to the aesthetics 
+### of the points, such as color, size, shape, or alpha. 
+### For example, you can create a scatter plot of the 
+### height and mass by gender using geom_point():
+
+ggplot(starwars, aes(x = height, y = mass, color = gender)) +
+  geom_point() +
+  labs(title = "Relationship between height and mass by gender",
+       x = "Height (cm)", y = "Mass (kg)")
+
+##Height vs. mass, colored by species.
+ggplot(starwars, aes(x=height, y=mass, color=species)) +
+  geom_point(alpha=0.6) +
+  labs(title="Height vs. Mass of Characters") +
+  theme_minimal()
+
+
+## 4. *Box Plot*:
+### Box plot: A box plot displays the summary statistics of a continuous variable using a box-and-whisker diagram. 
+### You can use geom_boxplot() to create a box plot, and optionally group the boxes by another variable using 
+### aes(group = ...) or aes(fill = ...). 
+### For example, you can create a box plot of the height by species using 
+### geom_boxplot():
+## Distribution of height by species.
+ggplot(starwars, aes(x=species, y=height)) +
+  geom_boxplot(aes(fill=species)) +
+  labs(title="Height Distribution by Species") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+## 5. *Density Plot*:
+#Distribution of height by gender.
+ggplot(starwars, aes(x=height, fill=gender)) +
+  geom_density(alpha=0.6) +
+  labs(title="Density Plot of Height by Gender") +
+  theme_minimal()
+
+
+## 6. *Violin Plot*:
+### Violin plot: 
+### A violin plot displays the distribution of a continuous variable 
+### using a kernel density estimate. You can use geom_violin() 
+### to create a violin plot, and optionally group the violins 
+### by another variable using aes(group = ...) or aes(fill = ...). 
+### For example, you can create a violin plot of the height by species 
+### using geom_violin():
+ggplot(starwars, aes(x = species, y = height, fill = species)) +
+  geom_violin() +
+  labs(title = "Height distribution by species",
+       x = "Species", y = "Height (cm)")
+##Distribution of mass by gender.
+ggplot(starwars, aes(x=gender, y=mass)) +
+  geom_violin(aes(fill=gender)) +
+  labs(title="Violin Plot of Mass by Gender") +
+  theme_minimal()
+
+
+## 7. *Facet Grid*:
+##Height vs. mass, faceted by gender.
+ggplot(starwars, aes(x=height, y=mass)) +
+  geom_point(aes(color=species), alpha=0.6) +
+  facet_wrap(~gender) +
+  labs(title="Height vs. Mass by Gender") +
+  theme_minimal()
+
+
+## 8. *Tile Plot*:
+##Number of characters by hair and eye color.
+starwars %>%
+  count(hair_color, eye_color) %>%
+  ggplot(aes(x=hair_color, y=eye_color, fill=n)) +
+  geom_tile() +
+  labs(title="Number of Characters by Hair and Eye Color") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+## 9. *Ridge Plot*:
+#Distribution of height by species.
+ggplot(starwars, aes(x=height, y=species, fill=species)) +
+  geom_density_ridges() +
+  labs(title="Ridge Plot of Height by Species") +
+  theme_ridges() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+## 10. *Bar Plot with Error Bars*:
+##Unfortunately, due to the categorical nature of most of the starwars dataset, 
+##calculating an average and standard error for a bar plot isn't straightforward. 
+
+## 11. *Stacked Area Chart*:
+##Again, due to the structure of the starwars dataset, 
+##creating a stacked area chart isn't straightforward. 
+##Stacked area charts typically require a temporal or ordinal variable on the x-axis 
+##and multiple categories to stack on the y-axis.
+
+
+### 12 Line plot: A line plot displays the trend of a continuous variable 
+### over time or another ordered variable using lines. 
+### You can use geom_line() to create a line plot, and optionally 
+### group the lines by another variable using aes(group = ...) 
+### or aes(color = ...). 
+### For example, you can create a line plot of the birth 
+### year by gender using geom_line():
+
+ggplot(starwars, aes(x = birth_year, y = ..count.., color = gender)) +
+  geom_line(stat = "count") +
+  labs(title = "Number of characters born by year and gender",
+       x = "Birth year (BBY)", y = "Count")
+
+### 13 Pie chart: A pie chart displays the proportion of different categories 
+### using circular sectors. You can use geom_bar() and coord_polar() 
+### to create a pie chart, and optionally label the slices with geom_text():
+ggplot(starwars, aes(x = "", fill = gender)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  geom_text(aes(label = scales::percent(..count../sum(..count..))), position = position_stack(vjust = 0.5), stat = "count") +
+  labs(title = "Proportion of gender",
+       x = NULL, y = NULL, fill = "Gender")
+
+
+
+### 14 Heatmap: A heatmap displays the values of a matrix using colors. 
+### You can use geom_tile() to create a heatmap, 
+### and map the values to the fill color using aes(fill = ...). 
+### For example, you can create a heatmap of the correlation matrix of 
+## numeric variables using geom_tile():
+starwars %>%
+  select_if(is.numeric) %>%
+  correlate() %>%
+  ggplot(aes(x = birth_year, y = mass, fill = birth_year)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  labs(title = "Correlation matrix of numeric variables",
+       x = NULL, y = NULL)
