@@ -1,0 +1,103 @@
+library(tidyverse)
+
+#load our dataset within R
+data1 <- read.csv(file.choose())
+
+#view the first 6 elements within my dataset
+head(data1)
+
+#view the last 6 rows
+tail(data1)
+
+#number of columns and rows
+dim(data1)
+
+#structure / data types
+str(data1)
+
+glimpse(data1)
+
+# variable list
+names(data1)
+
+#list number of columns
+length(data1)
+
+#summary of your table
+summary(data1)
+
+unique(data1$survived)
+unique(data1$sex)
+unique(data1$passengerClass)
+
+library(ggplot2)
+names(data1)
+
+
+#convert variables to as a factor (categorical variables)
+
+data1$survived <- as.factor((data1$survived))
+data1$sex <- as.factor((data1$sex))
+data1$passengerClass <- as.factor((data1$passengerClass))
+
+#What was the survival rate?
+ggplot(data1, aes(x=survived))+ 
+  theme_bw() + geom_bar()+ 
+  labs(y="Passenger Count", 
+       title= "Titanic Survival Rates")
+
+ #for exact percentages                       
+prop.table(table(data1$survived))
+
+#What was the survival rate by gender?
+ggplot(data1, aes(x=sex, fill=survived))+ 
+  theme_bw() + geom_bar()+ 
+  labs(y="Passenger Count", 
+       title= " Rates by sex")
+names(data1)
+
+#What was the survival rate by class of ticket?
+ggplot(data1, aes(x=passengerClass, fill=survived))+ 
+  theme_bw() + geom_bar()+ 
+  labs(y="Passenger Count", 
+       title= " Rates by Passenger Class")
+
+#What was the survival rate by class of ticket and gender?
+ggplot(data1, aes(x=sex,fill=survived))+ 
+  theme_bw() + facet_wrap(~passengerClass) + 
+  geom_bar() +
+  labs(y="Passenger Count", 
+       title= " Rates by PClass and sex")
+
+#What is the distribution of passenger age?
+ggplot(data1, aes(x=age))+ 
+  theme_bw() + geom_histogram(binwidth = 1)+ 
+  labs(y="Passenger Count",
+       x="Age",
+       title= " Title age distribution")
+
+#What are the survival rates by age?
+ggplot(data1, aes(x=age, fill=survived))+ 
+  theme_bw() + geom_bar()+ 
+  labs(y="Passenger Count", 
+       title= " Rates by age")
+
+#box and whisker plot
+ggplot(data1, aes(x=survived, y=sex))+ 
+  theme_bw() + geom_boxplot()+ 
+  labs(y="sex", x="Survived",
+       title= " Survival rate by age")
+
+#What was the survival rates by age when 
+#segmented by gender and class of tickets?
+
+ggplot(data1, aes(x=age,fill=survived))+ 
+  theme_bw() + facet_wrap(sex~passengerClass) + 
+  geom_density(alpha=1) +
+  labs(y="",x="Age", 
+       title= " Rates by PClass, age and sex")
+
+
+
+  
+
