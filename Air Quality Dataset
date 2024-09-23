@@ -1,0 +1,133 @@
+library(tidyverse)
+data("airquality")
+
+aq_colname <- colnames(airquality)
+
+airquality1 <- rename(airquality,Days=Day)
+View(airquality1)
+colnames(airquality1) <- paste0("var",1:ncol(airquality1))
+View(airquality1)
+
+sum(is.na(airquality1))
+
+airquality1 <- drop_na(airquality1)
+airquality1 <- na.omit((airquality1))
+
+
+#############CHARTS########################
+
+###The airquality dataset, which provides daily air quality measurements 
+###in New York from May to September 1973. 
+###This dataset includes information on ozone, solar radiation, 
+###wind, temperature, and month.
+
+### Preparations:
+# Installing and loading required packages
+install.packages(c("tidyverse", "ggridges"))
+library(tidyverse)
+library(ggridges)
+
+# Load the airquality dataset
+data(airquality)
+
+
+### airquality dataset:
+
+### 1. *Basic Histogram*:
+###Distribution of Ozone levels.
+ggplot(airquality, aes(x=Ozone)) +
+  geom_histogram(binwidth=5, fill="steelblue") +
+  labs(title="Histogram of Ozone Levels", x="Ozone (ppb)", y="Count") +
+  theme_minimal()
+
+
+### 2. *Bar Plot*:
+###Average wind speed by month.
+airquality %>%
+  group_by(Month) %>%
+  summarise(avg_Wind = mean(Wind, na.rm=TRUE)) %>%
+  ggplot(aes(x=factor(Month), y=avg_Wind)) +
+  geom_bar(stat="identity", fill="steelblue") +
+  labs(title="Average Wind Speed by Month", x="Month", y="Average Wind Speed (mph)") +
+  theme_minimal()
+
+
+### 3. *Scatter Plot*:
+###Temperature vs. Ozone, colored by Solar Radiation.
+ggplot(airquality, aes(x=Temp, y=Ozone, color=Solar.R)) +
+  geom_point(alpha=0.6) +
+  labs(title="Temperature vs. Ozone Levels colored by Solar Radiation") +
+  theme_minimal()
+
+
+### 4. *Box Plot*:
+###Distribution of Ozone by month.
+ggplot(airquality, aes(x=factor(Month), y=Ozone)) +
+  geom_boxplot(aes(fill=factor(Month))) +
+  labs(title="Ozone Distribution by Month", x="Month", y="Ozone (ppb)") +
+  theme_minimal()
+
+
+### 5. *Density Plot*:
+###Distribution of Temperature across months.
+ggplot(airquality, aes(x=Temp, fill=factor(Month))) +
+  geom_density(alpha=0.6) +
+  labs(title="Density Plot of Temperature by Month", x="Temperature (°F)") +
+  theme_minimal()
+
+
+### 6. *Violin Plot*:
+###Distribution of wind speed by month.
+ggplot(airquality, aes(x=factor(Month), y=Wind)) +
+  geom_violin(aes(fill=factor(Month))) +
+  labs(title="Violin Plot of Wind Speed by Month") +
+  theme_minimal()
+
+
+### 7. *Facet Grid*:
+###Temperature vs. Ozone, faceted by month.
+ggplot(airquality, aes(x=Temp, y=Ozone)) +
+  geom_point(aes(color=Solar.R), alpha=0.6) +
+  facet_wrap(~Month) +
+  labs(title="Temperature vs. Ozone Levels by Month") +
+  theme_minimal()
+
+
+### 8. *Tile Plot*:
+###Using wind and temperature to create binned counts.
+airquality %>%
+  mutate(binned_Wind = cut_width(Wind, 1),
+         binned_Temp = cut_width(Temp, 2)) %>%
+  count(binned_Wind, binned_Temp) %>%
+  ggplot(aes(x=binned_Wind, y=binned_Temp, fill=n)) +
+  geom_tile() +
+  labs(title="Tile Plot of Binned Wind and Temperature") +
+  theme_minimal()
+
+
+### 9. *Ridge Plot*:
+##Distribution of Ozone levels by month.
+ggplot(airquality, aes(x=Ozone, y=factor(Month), fill=factor(Month))) +
+  geom_density_ridges() +
+  labs(title="Ridge Plot of Ozone Levels by Month") +
+  theme_ridges()
+
+
+### 10. *Bar Plot with Error Bars*:
+###Average ozone levels by month with standard error.
+airquality %>%
+  group_by(Month) %>%
+  summarise(mean_Ozone = mean(Ozone, na.rm=TRUE),
+            se = sd(Ozone, na.rm=TRUE) / sqrt(n())) %>%
+  ggplot(aes(x=factor(Month), y=mean_Ozone)) +
+  geom_bar(stat="identity", aes(fill=factor(Month))) +
+  geom_errorbar(aes(ymin=mean_Ozone-se, ymax=mean_Ozone+se), width=0.2) +
+  labs(title="Average Ozone Levels by Month with Error Bars") +
+  theme_minimal()
+
+
+### 11. *Stacked Area Chart*:
+###For the airquality dataset, a good example isn't immediately clear, 
+###as it lacks a clear temporal sequence apart from months 
+###(which are discrete, not continuous). Typically, you'd 
+###need time-series data with a clear sequence and multiple categories to stack.
