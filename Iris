@@ -1,0 +1,263 @@
+##### DATAFRAMES ######
+#tidyverse
+install.packages("tidyverse")
+library(tidyverse)
+data(iris)
+attach(iris)
+View(iris)
+head(iris)
+######### Data Manipulation #############
+# Change columns names
+names(iris)
+
+# Change column order / Sorting
+iris<-iris[,c(5,4,2,1,3)]
+head(iris)
+# desc alphabetical
+iris<-iris[,sort(names(iris), decreasing = TRUE)]
+head(iris)
+?sort
+
+# Add column (independent / derived/combined)
+iris$NewColumn<- 1:nrow(iris)
+head(iris)
+
+iris$Derived <- 2*iris$Petal.Width
+head(iris)
+
+iris$Combined <- iris$Petal.Length*iris$Sepal.Width
+head(iris)
+str(iris)
+
+iris4<- iris[,c('combined',names(iris)[names(iris)!='combined'])]
+iris5<- iris4[,c(2,3,1,4,5,6,7)]
+head(iris5)
+iris6<- iris4[,c("Petal.Length", "Combined", "Species", "Sepal.Width",  "combined", "Sepal.Length", "Petal.Width")]
+head(iris6)
+iris$combined <- paste0(iris$Species,iris$Petal.Length)
+head(iris4)
+
+# Remove Column
+iris2 <-iris[,-2]
+#or
+iris4<- iris[,names(iris)[names(iris)!='combined']]
+head(iris2)
+library(tidyverse)
+# Select columns
+iris7<- select(iris,combined,Combined)
+head(iris7)
+iris8<-iris[,names(iris)[names(iris)%in%c('Combined', 'combined')]]
+head(iris8)
+# Add records / rows
+iris9<-rbind(iris8, data.frame(Combined=c(4,5,7),combined=c("test1","test3","test5")))
+tail(iris9)
+
+iris10<-add_row(iris8,Combined=c(41,51,71),combined=c("test1","test3","test5"))
+tail(iris10,n=20)
+# Remove records / rows
+iris11<- filter(iris10,Combined<15 | Combined>30)
+max(iris11$Combined)
+min(iris11$Combined)
+
+# Check for NAN
+iris13<-mutate(iris,Sepal.Length=na_if(Sepal.Length,5.0))
+iris15<- mutate(iris,Sepal.Length= replace(Sepal.Length,Sepal.Length==5.1,NaN))
+iris16<- filter(iris15, is.nan(iris15$Sepal.Length))
+head(iris16)
+view(iris13)
+
+
+# Check for missing values / NA
+iris17 <- filter(iris13, is.na(iris13$Sepal.Length))
+view(iris17)
+
+# Replace NA in Sepal.Length replace with value -99
+
+iris18 <- mutate(iris13, Sepal.Length=replace_na(Sepal.Length, -99))
+
+# Remove NA
+iris21 <- mutate(iris13, Sepal.Width=replace(Sepal.Width, Sepal.Width==2.4, NA))
+
+#removing NA from a specified column
+iris23 <- filter(iris21, !is.na(Sepal.Length))
+
+# for the entire dataset
+iris19 <- na.omit(iris13)
+view(iris19)
+
+# Check for nulls
+irisis.null(iris13)
+iris24 <- mutate(iris13, Sepal.Width=replace(Sepal.Width, Sepal.Width==3.0, NA))
+str(dataset24)
+
+# Identify  categorical Columns for factorise
+lengths(lapply(iris13, unique))
+#Identifying for individual column
+length(unique(iris13$Species))
+
+
+# Convert to factor
+iris25 <- iris13
+
+iris25$Species<-as.factor(iris25$Species)
+
+# Change factor levels
+levels(iris25$Species)
+
+iris25$Species <- fct_relevel(iris25$Species, c("versicolor","setosa","virginica"))
+
+# Check for duplicates
+iris25[duplicated(iris25),]
+duplicated(iris25)
+duplicated(iris25$Sepal.Width)
+
+# Remove duplicates
+iris26 <- iris25[!duplicated(iris25),]
+
+# Replace/Update values
+iris13[iris13==5.04]<- -5.0
+
+str(iris13)
+
+############### STATISTICS ####################
+
+################ GRAPHS ########################
+###The iris dataset using the requested plots.
+
+### Preparations:
+# Installing and loading required packages
+install.packages(c("tidyverse", "ggridges"))
+library(tidyverse)
+library(ggridges)
+
+# Load the iris dataset
+data(iris)
+
+
+### iris dataset:
+
+###1. *Basic Histogram*:
+###Distribution of Sepal.Length.
+ggplot(iris, aes(x=Sepal.Length,fill=factor(Sepal.Length))) +
+  geom_histogram(binwidth=0.5, ) +
+  labs(title="Histogram of Sepal Length", x="Sepal Length", y="Count") +
+  theme_minimal()
+
+# Create a histogram of sepal length
+ggplot(data = iris, aes(x = Sepal.Length)) +
+  geom_histogram(aes(fill = Species), bins = 10) +
+  labs(title = "Histogram of sepal length",
+       x = "Sepal length (cm)",
+       y = "Count")
+
+### 2. *Bar Plot*:
+###Average petal length by species.
+iris %>%
+  group_by(Species) %>%
+  summarise(avg_Petal.Length = mean(Petal.Length)) %>%
+  ggplot(aes(x=Species, y=avg_Petal.Length)) +
+  geom_bar(stat="identity", fill="steelblue") +
+  labs(title="Average Petal Length by Species") +
+  theme_minimal()
+
+
+### 3. *Scatter Plot*:
+###Sepal width vs. sepal length, colored by species.
+# Create a scatter plot of petal length vs petal width
+ggplot(data = iris, aes(x = Petal.Length, y = Petal.Width)) +
+  geom_point(aes(color = Species)) +
+  labs(title = "Scatter plot of petal length vs petal width",
+       x = "Petal length (cm)",
+       y = "Petal width (cm)")+
+  theme_minimal()
+
+
+### 4. *Box Plot*:
+###Sepal length distribution by species.
+ggplot(iris, aes(x=Species, y=Sepal.Length)) +
+  geom_boxplot(aes(fill=Species)) +
+  labs(title="Sepal Length Distribution by Species") +
+  theme_minimal()
+
+
+### 5. *Density Plot*:
+###Distribution of sepal length by species.
+ggplot(iris, aes(x=Sepal.Length, fill=Species)) +
+  geom_density(alpha=0.6) +
+  labs(title="Density Plot of Sepal Length by Species") +
+  theme_minimal()
+
+
+### 6. *Violin Plot*:
+###Distribution of sepal length by species.
+ggplot(iris, aes(x=Species, y=Sepal.Length)) +
+  geom_violin(aes(fill=Species)) +
+  labs(title="Violin Plot of Sepal Length by Species") +
+  theme_minimal()
+
+
+### 7. *Facet Grid*:
+###Petal width vs. petal length, faceted by species.
+ggplot(iris, aes(x=Petal.Length, y=Petal.Width)) +
+  geom_point(aes(color=Species), alpha=0.6) +
+  facet_wrap(~Species) +
+  labs(title="Petal Width vs. Petal Length by Species") +
+  theme_minimal()
+
+
+### 8. *Tile Plot*:
+### Using sepal and petal width as an example 
+### (not perfectly suitable for iris, but for demonstration):
+iris %>%
+  mutate(binned_Sepal.Width = cut_width(Sepal.Width, 0.5),
+         binned_Petal.Width = cut_width(Petal.Width, 0.5)) %>%
+  count(binned_Sepal.Width, binned_Petal.Width) %>%
+  ggplot(aes(x=binned_Sepal.Width, y=binned_Petal.Width, fill=n)) +
+  geom_tile() +
+  labs(title="Tile Plot of Binned Sepal and Petal Widths") +
+  theme_minimal()
+
+
+### 9. *Ridge Plot*:
+###Distribution of sepal length by species.
+ggplot(iris, aes(x=Sepal.Length, y=Species, fill=Species)) +
+  geom_density_ridges() +
+  labs(title="Ridge Plot of Sepal Length by Species") +
+  theme_ridges()
+
+
+### 10. *Bar Plot with Error Bars*:
+###Average sepal length by species with standard error.
+iris %>%
+  group_by(Species) %>%
+  summarise(mean_Sepal.Length = mean(Sepal.Length),
+            se = sd(Sepal.Length) / sqrt(n())) %>%
+  ggplot(aes(x=Species, y=mean_Sepal.Length)) +
+  geom_bar(stat="identity", aes(fill=Species)) +
+  geom_errorbar(aes(ymin=mean_Sepal.Length-se, ymax=mean_Sepal.Length+se), width=0.2) +
+  labs(title="Average Sepal Length by Species with Error Bars") +
+  theme_minimal()
+
+
+### 11. *Stacked Area Chart*:
+###Unfortunately, the iris dataset isn't perfectly suitable for 
+###stacked area charts because it lacks a clear temporal or 
+###ordinal variable to plot on the x-axis. However, 
+###if you had such data, the process would involve grouping 
+###by the x-variable and species, then plotting with geom_area().
+
+### 12 # Create a line chart of sepal length by species
+ggplot(data = iris, aes(x = 1:nrow(iris), y = Sepal.Length)) +
+  geom_line(aes(color = Species)) +
+  labs(title = "Line chart of sepal length by species",
+       x = "Observation number",
+       y = "Sepal length (cm)")
+
+### 13 # Create a pie chart of species proportion
+ggplot(data = iris, aes(x = "", y = after_stat(count), fill = Species)) +
+  geom_bar(width = 1) +
+  coord_polar(theta = "y") +
+  labs(title = "Pie chart of species proportion",
+       x = "",
+       y = "")
+
